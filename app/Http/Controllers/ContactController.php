@@ -39,11 +39,23 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
-        $contact = Contact::create($request->all());
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', 'integer', 'in:1,2,3'],
+            'email' => ['required', 'email', 'max:255'],
+            'tel' => ['required', 'regex:/^[0-9]{10,11}$/'],
+            'address' => ['required', 'string', 'max:255'],
+            'building' => ['nullable', 'string', 'max:255'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'detail' => ['required', 'string', 'max:120'],
+            'tag_ids' => ['nullable', 'array'],
+            'tag_ids.*' => ['integer', 'exists:tags,id'],
+        ]);
 
-        if ($request->has('tag_ids')) {
-            $contact->tags()->sync($request->input('tag_ids'));
-        }
+        $contact = Contact::create(collect($validated)->except('tag_ids')->all());
+
+        $contact->tags()->sync($validated['tag_ids'] ?? []);
 
         return redirect('/thanks');
     }
