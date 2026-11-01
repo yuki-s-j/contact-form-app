@@ -124,4 +124,160 @@ class ContactTest extends TestCase
             return $validated['tel'] === '09012345678';
         });
     }
+
+    // お問い合わせ内容が120文字なら確認画面を表示できる
+    public function test_contact_confirmation_accepts_120_characters(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '090',
+            'tel2' => '1234',
+            'tel3' => '5678',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '渋谷ビル301',
+            'category_id' => $category->id,
+            'detail' => str_repeat('あ', 120),
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertViewIs('contact.confirm');
+        $response->assertSessionHasNoErrors();
+    }
+
+    // お問い合わせ内容が121文字ならエラーになる
+    public function test_contact_confirmation_rejects_121_characters(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->from('/')->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '090',
+            'tel2' => '1234',
+            'tel3' => '5678',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '渋谷ビル301',
+            'category_id' => $category->id,
+            'detail' => str_repeat('あ', 121),
+        ]);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHasErrors(['detail']);
+    }
+
+    // 電話番号が9桁ならエラーになる
+    public function test_contact_confirmation_rejects_9_digit_phone(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->from('/')->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '090',
+            'tel2' => '123',
+            'tel3' => '567',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '渋谷ビル301',
+            'category_id' => $category->id,
+            'detail' => 'お問い合わせのテストです。',
+        ]);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHasErrors(['tel']);
+    }
+
+    // 電話番号が10桁なら確認画面を表示できる
+    public function test_contact_confirmation_accepts_10_digit_phone(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '03',
+            'tel2' => '1234',
+            'tel3' => '5678',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '渋谷ビル301',
+            'category_id' => $category->id,
+            'detail' => 'お問い合わせのテストです。',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertViewIs('contact.confirm');
+
+        $response->assertViewHas('validated', function ($validated) {
+            return $validated['tel'] === '0312345678';
+        });
+    }
+
+    // 電話番号が12桁ならエラーになる
+    public function test_contact_confirmation_rejects_12_digit_phone(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->from('/')->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '090',
+            'tel2' => '12345',
+            'tel3' => '6789',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '渋谷ビル301',
+            'category_id' => $category->id,
+            'detail' => 'お問い合わせのテストです。',
+        ]);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHasErrors(['tel']);
+    }
+
+    // 建物名が未入力でも確認画面を表示できる
+    public function test_contact_confirmation_accepts_empty_building(): void
+    {
+        $category = Category::create([
+            'content' => '商品について',
+        ]);
+
+        $response = $this->post('/contacts/confirm', [
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'user@example.com',
+            'tel1' => '090',
+            'tel2' => '1234',
+            'tel3' => '5678',
+            'address' => '東京都渋谷区1-1-1',
+            'building' => '',
+            'category_id' => $category->id,
+            'detail' => 'お問い合わせのテストです。',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertViewIs('contact.confirm');
+        $response->assertSessionHasNoErrors();
+    }
 }
