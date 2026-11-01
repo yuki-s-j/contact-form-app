@@ -36,12 +36,14 @@ class AdminTest extends TestCase
             'category_id' => $category->id,
             'first_name' => '山田',
             'last_name' => '太郎',
+            'email' => 'yamada@example.com',
         ]);
 
         $contact2 = Contact::factory()->create([
             'category_id' => $category->id,
             'first_name' => '佐藤',
             'last_name' => '花子',
+            'email' => 'sato@example.com',
         ]);
 
         $response = $this->actingAs($user)->get('/admin?keyword=山田');
