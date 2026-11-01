@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Contact;
 use App\Http\Requests\Api\V1\IndexContactRequest;
 use App\Http\Requests\Api\V1\StoreContactRequest;
 use App\Http\Requests\Api\V1\UpdateContactRequest;
 use App\Http\Resources\ContactResource;
-use Illuminate\Http\Request;
+use App\Models\Contact;
 
 class ContactController extends Controller
 {

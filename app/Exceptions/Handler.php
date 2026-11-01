@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Http\Request;
+use App\Models\Contact;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -34,8 +36,8 @@ class Handler extends ExceptionHandler
 
             if (
                 $request->is('api/v1/contacts/*')
-                && $previous instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
-                && $previous->getModel() === \App\Models\Contact::class
+                && $previous instanceof ModelNotFoundException
+                && $previous->getModel() === Contact::class
             ) {
                 return response()->json([
                     'error' => 'お問い合わせが見つかりませんでした。',

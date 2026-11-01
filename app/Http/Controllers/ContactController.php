@@ -129,7 +129,7 @@ class ContactController extends Controller
             foreach ($contacts as $contact) {
                 fputcsv($stream, [
                     $contact->id,
-                    $contact->first_name . ' ' . $contact->last_name,
+                    $contact->first_name.' '.$contact->last_name,
                     match ((int) $contact->gender) {
                         1 => '男性',
                         2 => '女性',
